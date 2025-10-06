@@ -110,7 +110,25 @@ module.exports = {
 
       // Sıradaki harfi belirt
       const nextLetter = turkishToLowerCase(word.slice(-1));
-      await message.reply(`🎯 Harika! **"${word}"** kelimesi kabul edildi! Sıradaki kelime **"${nextLetter}"** harfi ile başlamalı!`);
+
+      // Ğ kontrolü - Ğ ile başlayan Türkçe kelime yok, yeni kelime başlat
+      if (nextLetter === 'ğ') {
+        const { getRandomTurkishWord } = require('../utils/turkishWords');
+        const newWord = await getRandomTurkishWord();
+
+        game.currentWord = newWord;
+        game.usedWords.push({
+          word: newWord,
+          userId: 'bot',
+          timestamp: new Date()
+        });
+        game.lastUserId = null;
+        await game.save();
+
+        await message.reply(`🎯 Harika! **"${word}"** kelimesi kabul edildi!\n\n⚠️ **"${nextLetter}"** harfi ile başlayan Türkçe kelime olmadığı için yeni kelime başlatıldı:\n\n🎮 Yeni kelime: **${newWord}**\nSıradaki kelime **"${newWord.slice(-1)}"** harfi ile başlamalı!`);
+      } else {
+        await message.reply(`🎯 Harika! **"${word}"** kelimesi kabul edildi! Sıradaki kelime **"${nextLetter}"** harfi ile başlamalı!`);
+      }
 
       console.log(`✅ "${word}" kelimesi ${message.author.username} tarafından kabul edildi`);
 

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Oyunu - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .admin-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+            font-weight: 600;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .btn-custom {
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .game-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .header-user {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .table-custom {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .action-btn {
+            padding: 5px 15px;
+            margin: 2px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <% if (user) { %>
+            <div class="header-user">
+                <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="Avatar" class="user-avatar">
+                <div>
+                    <h5 class="mb-0"><%= user.username %></h5>
+                    <small class="text-muted">Admin Panel</small>
+                </div>
+                <a href="/logout" class="btn btn-sm btn-outline-danger ms-auto">Çıkış Yap</a>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-controller" style="font-size: 2rem; color: #667eea;"></i>
+                        <div class="stat-value"><%= stats.totalGames %></div>
+                        <div class="stat-label">Toplam Oyun</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-chat-text" style="font-size: 2rem; color: #764ba2;"></i>
+                        <div class="stat-value"><%= stats.totalWords %></div>
+                        <div class="stat-label">Toplam Kelime</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-people" style="font-size: 2rem; color: #667eea;"></i>
+                        <div class="stat-value"><%= stats.activeChannels %></div>
+                        <div class="stat-label">Aktif Kanal</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-clock-history" style="font-size: 2rem; color: #764ba2;"></i>
+                        <div class="stat-value"><%= stats.avgGameTime %></div>
+                        <div class="stat-label">Ort. Oyun Süresi</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-gear"></i> Aktif Oyunlar</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Kanal</th>
+                                    <th>Mevcut Kelime</th>
+                                    <th>Toplam Kelime</th>
+                                    <th>Durum</th>
+                                    <th>Son Güncelleme</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% games.forEach(game => { %>
+                                    <tr>
+                                        <td><strong>#<%= game.channelName || game.channelId %></strong></td>
+                                        <td><span class="badge bg-primary"><%= game.currentWord %></span></td>
+                                        <td><%= game.usedWords.length %></td>
+                                        <td>
+                                            <span class="game-status <%= game.isActive ? 'status-active' : 'status-inactive' %>">
+                                                <%= game.isActive ? 'Aktif' : 'Pasif' %>
+                                            </span>
+                                        </td>
+                                        <td><%= new Date(game.createdAt).toLocaleString('tr-TR') %></td>
+                                        <td>
+                                            <% if (game.isActive) { %>
+                                                <button class="btn btn-sm btn-warning action-btn" onclick="resetGame('<%= game.channelId %>')">
+                                                    <i class="bi bi-arrow-clockwise"></i> Sıfırla
+                                                </button>
+                                                <button class="btn btn-sm btn-danger action-btn" onclick="endGame('<%= game.channelId %>')">
+                                                    <i class="bi bi-stop-circle"></i> Durdur
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn btn-sm btn-success action-btn" onclick="startGame('<%= game.channelId %>')">
+                                                    <i class="bi bi-play-circle"></i> Başlat
+                                                </button>
+                                            <% } %>
+                                            <button class="btn btn-sm btn-info action-btn" onclick="viewDetails('<%= game.channelId %>')">
+                                                <i class="bi bi-eye"></i> Detay
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Yeni Oyun Başlat</h4>
+                </div>
+                <div class="card-body">
+                    <form id="newGameForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kanal ID</label>
+                                <input type="text" class="form-control" id="channelId" placeholder="Discord kanal ID'si" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Başlangıç Kelimesi (Opsiyonel)</label>
+                                <input type="text" class="form-control" id="startWord" placeholder="Boş bırakılırsa rastgele kelime">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-custom">
+                            <i class="bi bi-play-fill"></i> Oyunu Başlat
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="detailsModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Oyun Detayları</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="detailsContent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <% } else { %>
+            <div class="card text-center">
+                <div class="card-body p-5">
+                    <i class="bi bi-shield-lock" style="font-size: 4rem; color: #667eea;"></i>
+                    <h2 class="mt-4">Kelime Oyunu Admin Panel</h2>
+                    <p class="text-muted mb-4">Yönetim paneline erişmek için Discord ile giriş yapın</p>
+                    <a href="/login" class="btn btn-primary-custom btn-custom btn-lg">
+                        <i class="bi bi-discord"></i> Discord ile Giriş Yap
+                    </a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function resetGame(channelId) {
+            if (!confirm('Bu oyunu sıfırlamak istediğinize emin misiniz?')) return;
+
+            try {
+                const response = await fetch('/api/admin/game/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Oyun başarıyla sıfırlandı!');
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function endGame(channelId) {
+            if (!confirm('Bu oyunu durdurmak istediğinize emin misiniz?')) return;
+
+            try {
+                const response = await fetch('/api/admin/game/end', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Oyun durduruldu!');
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function startGame(channelId) {
+            if (!confirm('Bu kanalda oyun başlatmak istediğinize emin misiniz?')) return;
+
+            try {
+                const response = await fetch('/api/admin/game/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Oyun başlatıldı!');
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function viewDetails(channelId) {
+            try {
+                const response = await fetch(`/api/admin/game/details/${channelId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    let html = '<div class="table-responsive">';
+                    html += '<h6>Son Kullanılan Kelimeler:</h6>';
+                    html += '<table class="table table-sm">';
+                    html += '<thead><tr><th>Kelime</th><th>Kullanıcı</th><th>Zaman</th></tr></thead><tbody>';
+
+                    data.words.slice(-20).reverse().forEach(w => {
+                        html += `<tr><td>${w.word}</td><td>${w.userId}</td><td>${new Date(w.timestamp).toLocaleString('tr-TR')}</td></tr>`;
+                    });
+
+                    html += '</tbody></table></div>';
+                    document.getElementById('detailsContent').innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+                }
+            } catch (error) {
+                alert('Detaylar yüklenemedi: ' + error.message);
+            }
+        }
+
+        document.getElementById('newGameForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const channelId = document.getElementById('channelId').value;
+            const startWord = document.getElementById('startWord').value;
+
+            try {
+                const response = await fetch('/api/admin/game/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId, startWord })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Oyun başarıyla başlatıldı!');
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

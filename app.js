@@ -152,6 +152,9 @@ app.use(cookieParser());
 const discordTicketRoute  = require('./src/routes/discordTicket');
 app.use(discordTicketRoute)
 
+const adminPanelRoute = require('./src/routes/adminPanel');
+app.use(adminPanelRoute)
+
 
 app.get("/", async (req, res) => {
   const conf = require("./src/configs/config.json");
@@ -614,3 +617,5 @@ class MusicBot extends Client {
 new MusicBot();
 
 client.login(settings.token).catch((err) => console.log(err));
+
+module.exports = { client };
